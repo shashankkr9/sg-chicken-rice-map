@@ -1494,7 +1494,7 @@ function ratingBarColor(val) {
 }
 
 function renderLeaderboard() {
-  var rated = stalls.filter(function(s) { return s.rating_angel !== null && s.rating_angel !== undefined && s.rating_angel !== 'None'; });
+  var rated = stalls.filter(function(s) { return getAvgRating(s) !== null; });
   var ascending = (lbSort === 'cost' || lbSort === 'value');
 
   rated.sort(function(a, b) {
