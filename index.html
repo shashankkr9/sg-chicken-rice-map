@@ -1591,21 +1591,36 @@ document.getElementById('lb-cards').addEventListener('click', function(e) {
   var s = stalls[idx];
   if (!s) return;
 
-  // Close leaderboard
+  // Close leaderboard first, then after repaint fly to stall
   toggleLeaderboard();
 
-  // Fly to stall and open popup/bottom sheet
-  map.flyTo([s.lat, s.lng], 17, {duration: 0.8});
-  setTimeout(function() {
-    for (var i = 0; i < markers.length; i++) {
-      var ll = markers[i].getLatLng();
-      if (Math.abs(ll.lat - s.lat) < 0.0001 && Math.abs(ll.lng - s.lng) < 0.0001) {
-        markers[i].openPopup();
-        history.replaceState(null, '', '#' + stallSlug(s));
-        break;
-      }
-    }
-  }, 900);
+  // Wait for CSS repaint (lb-open removed, map visible, bottom sheet unhidden)
+  requestAnimationFrame(function() {
+    setTimeout(function() {
+      // Invalidate map size since it was hidden behind leaderboard
+      map.invalidateSize();
+      map.flyTo([s.lat, s.lng], 17, {duration: 0.8});
+      setTimeout(function() {
+        // On mobile, directly open bottom sheet instead of relying on openPopup override
+        if (window.innerWidth <= 640) {
+          openBottomSheet(s);
+          history.replaceState(null, '', '#' + stallSlug(s));
+          if (s.easter_egg) {
+            setTimeout(function() { document.getElementById('easter-egg').classList.add('show'); }, 800);
+          }
+        } else {
+          for (var i = 0; i < markers.length; i++) {
+            var ll = markers[i].getLatLng();
+            if (Math.abs(ll.lat - s.lat) < 0.0001 && Math.abs(ll.lng - s.lng) < 0.0001) {
+              markers[i].openPopup();
+              history.replaceState(null, '', '#' + stallSlug(s));
+              break;
+            }
+          }
+        }
+      }, 900);
+    }, 50);
+  });
 });
 </script>
 <!-- Bottom sheet backdrop -->
