@@ -1037,7 +1037,7 @@ function renderMarkers() {
         openBottomSheet(s);
         history.replaceState(null, '', '#' + stallSlug(s));
         if (s.easter_egg) {
-          setTimeout(function() { document.getElementById('easter-egg').classList.add('show'); }, 800);
+          setTimeout(function() { document.getElementById('easter-egg').classList.add('show'); }, 3000);
         }
       });
       // Override openPopup so search/findNearMe/deeplinks use bottom sheet too
@@ -1045,7 +1045,7 @@ function renderMarkers() {
         openBottomSheet(s);
         history.replaceState(null, '', '#' + stallSlug(s));
         if (s.easter_egg) {
-          setTimeout(function() { document.getElementById('easter-egg').classList.add('show'); }, 800);
+          setTimeout(function() { document.getElementById('easter-egg').classList.add('show'); }, 3000);
         }
         return this;
       };
@@ -1055,7 +1055,7 @@ function renderMarkers() {
       marker.on('popupopen', function() {
         history.replaceState(null, '', '#' + stallSlug(s));
         if (s.easter_egg) {
-          setTimeout(function() { document.getElementById('easter-egg').classList.add('show'); }, 800);
+          setTimeout(function() { document.getElementById('easter-egg').classList.add('show'); }, 3000);
         }
       });
       marker.on('popupclose', function() {
@@ -1143,7 +1143,7 @@ searchResults.addEventListener('click', function(e) {
     if (Math.abs(ll.lat - s.lat) < 0.0001 && Math.abs(ll.lng - s.lng) < 0.0001) {
       m.openPopup();
       if (s.easter_egg) {
-        setTimeout(function() { document.getElementById('easter-egg').classList.add('show'); }, 600);
+        setTimeout(function() { document.getElementById('easter-egg').classList.add('show'); }, 3000);
       }
     }
   });
@@ -1433,7 +1433,7 @@ function openStallFromMarker(marker, fromDeepLink) {
     history.replaceState(null, '', '#' + stallSlug(s));
     // Easter egg only fires on organic discovery (search, map click, filter) — not deep links
     if (s.easter_egg && !fromDeepLink) {
-      setTimeout(function() { document.getElementById('easter-egg').classList.add('show'); }, 800);
+      setTimeout(function() { document.getElementById('easter-egg').classList.add('show'); }, 3000);
     }
   } else {
     marker.openPopup();
@@ -1604,7 +1604,7 @@ function lbCardGo(idx) {
           openBottomSheet(s);
           history.replaceState(null, '', '#' + stallSlug(s));
           if (s.easter_egg) {
-            setTimeout(function() { document.getElementById('easter-egg').classList.add('show'); }, 800);
+            setTimeout(function() { document.getElementById('easter-egg').classList.add('show'); }, 3000);
           }
         } else {
           for (var i = 0; i < markers.length; i++) {
