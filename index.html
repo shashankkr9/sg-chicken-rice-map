@@ -928,6 +928,10 @@ function makePopup(s) {
   html += '<div class="meta">' + s.type + ' · ' + s.hours + distTag + '<br>' + s.address + '</div>';
   html += '<div class="overall">Overall: ' + (avg || 'N/A') + '/10</div>';
   html += '<div class="ratings">';
+  html += '<span class="rating-label">Tenderness</span><span class="rating-val">' + (s.tenderness_angel || '-') + '</span>';
+  html += '<span class="rating-label">Rice</span><span class="rating-val">' + (s.rice_angel || '-') + '</span>';
+  html += '<span class="rating-label">Chilli</span><span class="rating-val">' + (s.chilli_angel || '-') + '</span>';
+  html += '<span class="rating-label">Soup</span><span class="rating-val">' + (s.soup_angel || '-') + '</span>';
   html += '</div>';
   html += ecoliBadge(s);
   if (s.remarks && s.remarks !== 'None') html += '<div class="remarks">' + s.remarks + '</div>';
@@ -1287,6 +1291,10 @@ function openBottomSheet(s) {
   html += '<hr class="bs-divider">';
   html += '<div class="bs-overall">Overall: ' + (avg || 'N/A') + '/10</div>';
   html += '<div class="bs-ratings-grid">';
+  html += '<span class="bs-rating-label">Tenderness</span><span class="bs-rating-val">' + (s.tenderness_angel || '-') + '</span>';
+  html += '<span class="bs-rating-label">Rice</span><span class="bs-rating-val">' + (s.rice_angel || '-') + '</span>';
+  html += '<span class="bs-rating-label">Chilli</span><span class="bs-rating-val">' + (s.chilli_angel || '-') + '</span>';
+  html += '<span class="bs-rating-label">Soup</span><span class="bs-rating-val">' + (s.soup_angel || '-') + '</span>';
   html += '</div>';
   html += ecoliBadge(s);
   if (s.remarks && s.remarks !== 'None') {
