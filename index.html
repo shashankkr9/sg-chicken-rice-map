@@ -370,11 +370,17 @@
 
     /* Quick filters: hidden by default, toggled via button */
     .quick-filters {
-      top: calc(env(safe-area-inset-top, 8px) + 50px);
-      width: 96%; display: none;
+      top: calc(env(safe-area-inset-top, 8px) + 48px);
+      left: 10px; right: 10px; width: auto;
+      transform: none; display: none;
+      padding: 4px; background: rgba(255,248,239,0.95);
+      border: 2px solid #000; border-radius: 10px;
+      box-shadow: 3px 3px 0 #000;
     }
+    body.dark .quick-filters { background: rgba(42,42,42,0.95); border-color: #FFC107; box-shadow: 3px 3px 0 #FFC107; }
     .quick-filters.show { display: flex; }
     .qf-pill { font-size: 11px; padding: 5px 10px; }
+
 
     /* Filter toggle button inside search bar area */
     .filter-toggle {
@@ -398,10 +404,10 @@
       padding: 8px 10px; z-index: 1001;
     }
 
-    /* Count badge: small, top-left below search */
+    /* Count badge: bottom left, above filter bar */
     .count-badge {
-      top: calc(env(safe-area-inset-top, 8px) + 50px); left: auto; right: 10px;
-      bottom: auto; font-size: 11px; padding: 4px 10px;
+      top: auto; bottom: 145px; left: 10px; right: auto;
+      font-size: 11px; padding: 4px 10px;
       border-width: 2px; box-shadow: 2px 2px 0 #000;
     }
 
@@ -744,6 +750,11 @@ function toggleFilterPills() {
   var btn = document.getElementById('filter-toggle');
   qf.classList.toggle('show');
   btn.classList.toggle('active');
+  // Push zoom controls down on mobile when filters are visible
+  var zoomCtrl = document.querySelector('.leaflet-top.leaflet-left');
+  if (zoomCtrl && window.innerWidth <= 640) {
+    zoomCtrl.style.top = qf.classList.contains('show') ? 'calc(env(safe-area-inset-top, 8px) + 95px)' : '';
+  }
 }
 
 var favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
