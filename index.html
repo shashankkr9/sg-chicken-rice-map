@@ -1551,7 +1551,7 @@ function renderLeaderboard() {
     if (lbSort === 'cost' && s.cost) sortLabel = ' · $' + parseFloat(s.cost).toFixed(2);
     if (lbSort === 'value' && s.cost_per_g) sortLabel = ' · $' + parseFloat(s.cost_per_g).toFixed(3) + '/g';
 
-    html += '<div class="lb-card" data-stall-idx="' + stalls.indexOf(s) + '">';
+    html += '<div class="lb-card" data-stall-idx="' + stalls.indexOf(s) + '" onclick="lbCardGo(' + stalls.indexOf(s) + ')">';
     html += '<div class="lb-rank' + (rank <= 3 ? ' top3' : '') + '">#' + rank + '</div>';
     html += '<div class="lb-card-body">';
     html += '<div class="lb-card-top">';
@@ -1584,20 +1584,12 @@ function renderLeaderboard() {
   container.innerHTML = html;
 }
 
-// Click handler for leaderboard cards
-function handleLbCardClick(e) {
-  var card = e.target.closest('.lb-card');
-  if (!card) return;
-  var idx = parseInt(card.dataset.stallIdx);
+// Navigate from leaderboard card to map
+function lbCardGo(idx) {
   var s = stalls[idx];
   if (!s) return;
 
-  // Prevent double-fire from both click and touchend
-  if (card._lbHandled) return;
-  card._lbHandled = true;
-  setTimeout(function() { card._lbHandled = false; }, 500);
-
-  // Close leaderboard first, then after repaint fly to stall
+  // Close leaderboard
   toggleLeaderboard();
 
   // Wait for CSS repaint (lb-open removed, map visible, bottom sheet unhidden)
@@ -1628,15 +1620,6 @@ function handleLbCardClick(e) {
     }, 50);
   });
 }
-// Bind both click and touchend for iOS compatibility
-var lbCardsEl = document.getElementById('lb-cards');
-lbCardsEl.addEventListener('click', handleLbCardClick);
-lbCardsEl.addEventListener('touchend', function(e) {
-  // Only handle single-finger taps, not scrolls
-  if (e.changedTouches && e.changedTouches.length === 1) {
-    handleLbCardClick(e);
-  }
-});
 </script>
 <!-- Bottom sheet backdrop -->
 <div class="bs-backdrop" id="bs-backdrop" onclick="closeBottomSheet()"></div>
