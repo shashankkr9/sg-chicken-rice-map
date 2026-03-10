@@ -1431,8 +1431,8 @@ function openStallFromMarker(marker, fromDeepLink) {
   if (window.innerWidth <= 640 && typeof openBottomSheet === 'function') {
     openBottomSheet(s);
     history.replaceState(null, '', '#' + stallSlug(s));
-    // Easter egg only fires on organic discovery (search, map click, filter) — not deep links
-    if (s.easter_egg && !fromDeepLink) {
+    // Easter egg fires on all paths including deep links
+    if (s.easter_egg) {
       setTimeout(function() { document.getElementById('easter-egg').classList.add('show'); }, 3000);
     }
   } else {
