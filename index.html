@@ -109,6 +109,37 @@
   .attribution-sub {
     display: block; font-size: 10px; color: #888; margin-top: 2px;
   }
+  .darkmode-btn {
+    position: absolute; top: 72px; right: 80px; z-index: 1000;
+    background: #FFF8EF; color: #000; border: 3px solid #000;
+    border-radius: 10px; padding: 8px 12px;
+    font-size: 16px; cursor: pointer;
+    box-shadow: 3px 3px 0 #000;
+    transition: all 0.1s ease;
+  }
+  .darkmode-btn:hover { transform: translate(1px, 1px); box-shadow: 2px 2px 0 #000; }
+  body.dark .darkmode-btn { background: #1a1a1a; color: #FFC107; border-color: #FFC107; box-shadow: 3px 3px 0 #FFC107; }
+  body.dark .search-bar { background: #2a2a2a; border-color: #FFC107; box-shadow: 4px 4px 0 #FFC107; }
+  body.dark .search-bar input { background: #1a1a1a; color: #fff; border-color: #444; }
+  body.dark .search-results { background: #2a2a2a; border-color: #FFC107; box-shadow: 4px 4px 0 #FFC107; }
+  body.dark .search-results .result-item { border-color: #444; color: #fff; }
+  body.dark .search-results .result-item:hover { background: #333; }
+  body.dark .search-results .result-name { color: #fff; }
+  body.dark .quick-filters .qf-pill { background: #2a2a2a; color: #fff; border-color: #FFC107; box-shadow: 2px 2px 0 #FFC107; }
+  body.dark .quick-filters .qf-pill.active { background: #FF6B35; color: #fff; }
+  body.dark .count-badge { background: #FF6B35; border-color: #FFC107; box-shadow: 3px 3px 0 #FFC107; color: #fff; }
+  body.dark .info-panel { background: #2a2a2a; border-color: #FFC107; box-shadow: 4px 4px 0 #FFC107; color: #fff; }
+  body.dark .info-panel p { color: #ccc; }
+  body.dark .info-panel h2 { color: #fff; }
+  body.dark .attribution { background: #1a1a1a; border-color: #FFC107; box-shadow: 2px 2px 0 #FFC107; }
+  body.dark .filter-bar { background: #2a2a2a; border-color: #FFC107; box-shadow: 4px 4px 0 #FFC107; }
+  body.dark .filter-bar label { color: #fff; }
+  body.dark .filter-bar select { background: #1a1a1a; color: #fff; border-color: #FFC107; }
+  body.dark .nearme-btn { background: #FF6B35; border-color: #FFC107; box-shadow: 3px 3px 0 #FFC107; color: #fff; }
+  body.dark .credit-bar { background: #FFC107; color: #000; }
+  body.dark .credit-bar a { color: #000; }
+  body.dark .easter-egg-card { background: #2a2a2a; color: #fff; border-color: #FFC107; box-shadow: 8px 8px 0 #FFC107; }
+  body.dark .easter-egg-card .egg-sub { color: #aaa; }
   .nearme-btn {
     position: absolute; top: 72px; right: 10px; z-index: 1000;
     background: #FFC107; color: #000; border: 3px solid #000;
@@ -333,6 +364,7 @@
     .qf-pill { font-size: 11px; padding: 6px 10px; }
     .info-panel { display: none; }
     .nearme-btn { top: auto; bottom: 110px; right: 10px; font-size: 12px; padding: 8px 12px; }
+    .darkmode-btn { top: auto; bottom: 110px; right: 70px; padding: 8px 10px; }
     .count-badge {
       top: auto; bottom: 90px; left: 10px; font-size: 12px;
       padding: 5px 12px;
@@ -390,6 +422,7 @@
   <div class="qf-pill" data-qf="ecoli-free" onclick="toggleQuickFilter(this)">✅ E.coli Free</div>
 </div>
 
+<button class="darkmode-btn" id="darkmode-btn" onclick="toggleDark()">🌙</button>
 <button class="nearme-btn" id="nearme-btn" onclick="findNearMe()">📍 Near Me</button>
 <div class="count-badge"><span id="visible-count">198</span> / 198 stalls</div>
 
@@ -434,10 +467,7 @@ const map = L.map('map', {
   inertia: true,
   inertiaDeceleration: 3000
 }).setView([1.3521, 103.8198], 12);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
-  maxZoom: 20
-}).addTo(map);
+// Initial tiles added via dark mode toggle below
 
 function stallSlug(s) {
   return s.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -629,6 +659,35 @@ document.addEventListener('click', function(e) {
     searchResults.style.display = 'none';
   }
 });
+
+var lightTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; OSM &copy; CARTO', maxZoom: 20
+});
+var darkTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; OSM &copy; CARTO', maxZoom: 20
+});
+var isDark = localStorage.getItem('darkMode') === 'true';
+if (isDark) {
+  document.body.classList.add('dark');
+  map.removeLayer(lightTiles);
+  darkTiles.addTo(map);
+  document.getElementById('darkmode-btn').textContent = '☀️';
+}
+
+function toggleDark() {
+  isDark = !isDark;
+  document.body.classList.toggle('dark', isDark);
+  if (isDark) {
+    map.removeLayer(lightTiles);
+    darkTiles.addTo(map);
+    document.getElementById('darkmode-btn').textContent = '☀️';
+  } else {
+    map.removeLayer(darkTiles);
+    lightTiles.addTo(map);
+    document.getElementById('darkmode-btn').textContent = '🌙';
+  }
+  localStorage.setItem('darkMode', isDark);
+}
 
 var activeQuickFilter = null;
 
