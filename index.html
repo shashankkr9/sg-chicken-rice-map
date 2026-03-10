@@ -242,7 +242,17 @@
   .popup-actions {
     display: flex; gap: 6px; margin-top: 8px;
   }
-  .popup-actions .share-btn { margin-top: 0; flex: 1; }
+  .popup-actions .share-btn, .popup-actions .fav-btn { margin-top: 0; flex: 1; }
+  .fav-btn {
+    display: block; text-align: center; padding: 6px 8px;
+    background: #FFF8EF; color: #000; border: 2px solid #000;
+    border-radius: 8px; font-weight: 700; font-size: 12px;
+    font-family: 'Space Grotesk', sans-serif;
+    cursor: pointer; box-shadow: 2px 2px 0 #000;
+    transition: all 0.1s ease;
+  }
+  .fav-btn:hover { transform: translate(1px, 1px); box-shadow: 1px 1px 0 #000; }
+  body.dark .fav-btn { background: #1a1a1a; color: #fff; border-color: #FFC107; box-shadow: 2px 2px 0 #FFC107; }
   .directions-btn {
     flex: 1; display: block; text-align: center; padding: 6px 12px;
     background: #FFC107; color: #000; border: 2px solid #000;
@@ -523,7 +533,20 @@ const map = L.map('map', {
   inertia: true,
   inertiaDeceleration: 3000
 }).setView([1.3521, 103.8198], 12);
-// Initial tiles added via dark mode toggle below
+// Tile layers
+var lightTilesInit = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; OSM &copy; CARTO', maxZoom: 20
+});
+var darkTilesInit = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; OSM &copy; CARTO', maxZoom: 20
+});
+var _isDarkInit = localStorage.getItem('darkMode') === 'true';
+if (_isDarkInit) {
+  document.body.classList.add('dark');
+  darkTilesInit.addTo(map);
+} else {
+  lightTilesInit.addTo(map);
+}
 
 function stallSlug(s) {
   return s.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -598,6 +621,7 @@ function makePopup(s) {
   html += '<div class="popup-actions">';
   html += '<a class="directions-btn" href="https://www.google.com/maps/dir/?api=1&destination=' + s.lat + ',' + s.lng + '" target="_blank" rel="noopener">📍 Directions</a>';
   html += '<button class="share-btn" onclick="this.classList.add(\'share-btn-active\');shareStall(stalls[' + stalls.indexOf(s) + '])">🔗 Share</button>';
+  html += '<button class="fav-btn" data-sn="' + s.sn + '" onclick="toggleFav(' + s.sn + ')">' + (isFav(s) ? '❤️ Saved' : '🤍 Save') + '</button>';
   html += '</div>';
   html += '</div>';
   return html;
@@ -716,19 +740,11 @@ document.addEventListener('click', function(e) {
   }
 });
 
-var lightTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; OSM &copy; CARTO', maxZoom: 20
-});
-var darkTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; OSM &copy; CARTO', maxZoom: 20
-});
-var isDark = localStorage.getItem('darkMode') === 'true';
+var lightTiles = lightTilesInit;
+var darkTiles = darkTilesInit;
+var isDark = _isDarkInit;
 if (isDark) {
-  document.body.classList.add('dark');
-  darkTiles.addTo(map);
   document.getElementById('darkmode-btn').textContent = '☀️';
-} else {
-  lightTiles.addTo(map);
 }
 
 function toggleDark() {
@@ -895,6 +911,7 @@ function findNearMe() {
 }
 
 renderMarkers();
+updateFavCount();
 
 // Deep link: open stall from URL hash
 function openFromHash() {
