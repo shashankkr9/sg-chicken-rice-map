@@ -73,14 +73,17 @@
   .ecoli-warn { background: #fff3cd; color: #856404; }
   .ecoli-bad { background: #f8d7da; color: #721c24; }
   .easter-egg-overlay {
-    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.6); z-index: 9999; justify-content: center; align-items: center;
+    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7); z-index: 99999;
+    justify-content: center; align-items: center;
+    -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
   }
-  .easter-egg-overlay.show { display: flex; }
+  .easter-egg-overlay.show { display: flex !important; }
   .easter-egg-card {
     background: white; border-radius: 20px; padding: 32px 28px; max-width: 340px;
     text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-    animation: eggPop 0.4s ease-out;
+    animation: eggPop 0.4s ease-out; position: relative; z-index: 100000;
   }
   @keyframes eggPop {
     0% { transform: scale(0.5); opacity: 0; }
@@ -176,14 +179,6 @@
 </head>
 <body>
 <div id="map"></div>
-<div class="easter-egg-overlay" id="easter-egg" onclick="if(event.target===this)this.classList.remove('show')"
-  <div class="easter-egg-card">
-    <div class="egg-emoji">🐔💕</div>
-    <div class="egg-msg">Hey Jessie, shall we grab a chicken rice at your best recommended place? 🍗</div>
-    <div class="egg-sub">— someone who'd travel across Singapore for your food recs ✨</div>
-    <a href="https://wa.me/6597565659?text=Hey%20Shashank!%20Let%27s%20go%20grab%20chicken%20rice%20at%20Min%20Kee%20%F0%9F%8D%97" class="egg-close" style="text-decoration:none; display:inline-block;">Let's go! 🥢</a>
-  </div>
-</div>
 <div class="search-bar">
   <span class="search-icon">🔍</span>
   <input type="text" id="search-input" placeholder="Search by stall name or area...">
@@ -391,5 +386,13 @@ document.addEventListener('click', function(e) {
 
 renderMarkers();
 </script>
+<div class="easter-egg-overlay" id="easter-egg" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="easter-egg-card">
+    <div class="egg-emoji">🐔💕</div>
+    <div class="egg-msg">Hey Jessie, shall we grab a chicken rice at your best recommended place? 🍗</div>
+    <div class="egg-sub">— someone who'd travel across Singapore for your food recs ✨</div>
+    <a href="https://wa.me/6597565659?text=Hey%20Shashank!%20Let%27s%20go%20grab%20chicken%20rice%20at%20Min%20Kee%20%F0%9F%8D%97" class="egg-close" style="text-decoration:none; display:inline-block;">Let's go! 🥢</a>
+  </div>
+</div>
 </body>
 </html>
