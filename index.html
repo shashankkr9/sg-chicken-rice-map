@@ -76,7 +76,7 @@
 
   /* ─── COUNT BADGE ─── */
   .count-badge {
-    position: absolute; top: 72px; left: 10px; z-index: 1000;
+    position: absolute; top: 96px; left: 10px; z-index: 1000;
     background: #FFC107; color: #000;
     padding: 6px 14px; border: 3px solid #000; border-radius: 20px;
     font-weight: 800; font-size: 13px;
@@ -125,6 +125,26 @@
     display: inline-block; background: #FFC107; color: #000;
     border: 1.5px solid #000; border-radius: 4px;
     font-size: 10px; font-weight: 700; padding: 1px 5px; margin-left: 4px;
+  }
+  .quick-filters {
+    position: absolute; top: 58px; left: 50%; transform: translateX(-50%);
+    z-index: 999; display: flex; gap: 6px; padding: 4px 0;
+    width: 90%; max-width: 500px; overflow-x: auto;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  }
+  .quick-filters::-webkit-scrollbar { display: none; }
+  .qf-pill {
+    flex-shrink: 0; padding: 5px 12px;
+    background: #FFF8EF; color: #000; border: 2px solid #000;
+    border-radius: 20px; font-size: 11px; font-weight: 700;
+    font-family: 'Space Grotesk', sans-serif;
+    cursor: pointer; box-shadow: 2px 2px 0 #000;
+    transition: all 0.1s ease; white-space: nowrap;
+  }
+  .qf-pill:hover { transform: translate(1px, 1px); box-shadow: 1px 1px 0 #000; }
+  .qf-pill.active {
+    background: #FF6B35; color: #fff;
+    transform: translate(2px, 2px); box-shadow: none;
   }
   .credit-bar {
     position: fixed; bottom: 0; left: 0; right: 0; z-index: 999;
@@ -292,7 +312,7 @@
   .leaflet-popup-close-button { color: #000 !important; font-weight: 800 !important; font-size: 18px !important; top: 6px !important; right: 8px !important; }
 
   /* Push Leaflet zoom controls below search bar */
-  .leaflet-top.leaflet-left { top: 115px; }
+  .leaflet-top.leaflet-left { top: 130px; }
 
   /* ─── MOBILE ─── */
   @media (max-width: 640px) {
@@ -309,6 +329,8 @@
       -webkit-overflow-scrolling: touch;
     }
     .search-results .result-item { padding: 14px 16px; }
+    .quick-filters { top: 54px; width: 96%; }
+    .qf-pill { font-size: 11px; padding: 6px 10px; }
     .info-panel { display: none; }
     .nearme-btn { top: auto; bottom: 110px; right: 10px; font-size: 12px; padding: 8px 12px; }
     .count-badge {
@@ -358,6 +380,15 @@
   <input type="text" id="search-input" placeholder="Search by stall name or area...">
 </div>
 <div class="search-results" id="search-results"></div>
+<div class="quick-filters" id="quick-filters">
+  <div class="qf-pill" data-qf="top10" onclick="toggleQuickFilter(this)">🏆 Top 10</div>
+  <div class="qf-pill" data-qf="best-rice" onclick="toggleQuickFilter(this)">🍚 Best Rice</div>
+  <div class="qf-pill" data-qf="best-chilli" onclick="toggleQuickFilter(this)">🌶️ Best Chilli</div>
+  <div class="qf-pill" data-qf="best-tender" onclick="toggleQuickFilter(this)">🍗 Most Tender</div>
+  <div class="qf-pill" data-qf="best-value" onclick="toggleQuickFilter(this)">💰 Best Value</div>
+  <div class="qf-pill" data-qf="best-soup" onclick="toggleQuickFilter(this)">🍜 Best Soup</div>
+  <div class="qf-pill" data-qf="ecoli-free" onclick="toggleQuickFilter(this)">✅ E.coli Free</div>
+</div>
 
 <button class="nearme-btn" id="nearme-btn" onclick="findNearMe()">📍 Near Me</button>
 <div class="count-badge"><span id="visible-count">198</span> / 198 stalls</div>
@@ -496,6 +527,8 @@ function renderMarkers() {
   const typeFilter = document.getElementById('type-filter').value;
   const ecoliOnly = document.getElementById('ecoli-filter').checked;
   
+  var qfStalls = activeQuickFilter ? getQuickFilterStalls(activeQuickFilter) : null;
+
   let count = 0;
   stalls.forEach(s => {
     const avg = getAvgRating(s);
@@ -504,6 +537,7 @@ function renderMarkers() {
     if (avgNum < minRating && minRating > 0) return;
     if (typeFilter !== 'all' && s.type !== typeFilter) return;
     if (ecoliOnly && s.ecoli !== 'N') return;
+    if (qfStalls && qfStalls.indexOf(s) === -1) return;
     
     const color = getRatingColor(avg);
     const radius = avg ? Math.max(5, parseFloat(avg) - 2) : 5;
@@ -595,6 +629,56 @@ document.addEventListener('click', function(e) {
     searchResults.style.display = 'none';
   }
 });
+
+var activeQuickFilter = null;
+
+function getField(s, field) {
+  var v = parseFloat(s[field + '_angel']);
+  var v2 = parseFloat(s[field + '_cam']);
+  if (!isNaN(v) && !isNaN(v2)) return (v + v2) / 2;
+  if (!isNaN(v)) return v;
+  if (!isNaN(v2)) return v2;
+  return null;
+}
+
+function getQuickFilterStalls(qf) {
+  var rated = stalls.filter(function(s) { return getAvgRating(s) !== null; });
+  switch(qf) {
+    case 'top10':
+      return rated.sort(function(a, b) { return parseFloat(getAvgRating(b)) - parseFloat(getAvgRating(a)); }).slice(0, 10);
+    case 'best-rice':
+      return rated.filter(function(s) { return getField(s, 'rice') !== null; })
+        .sort(function(a, b) { return getField(b, 'rice') - getField(a, 'rice'); }).slice(0, 10);
+    case 'best-chilli':
+      return rated.filter(function(s) { return getField(s, 'chilli') !== null; })
+        .sort(function(a, b) { return getField(b, 'chilli') - getField(a, 'chilli'); }).slice(0, 10);
+    case 'best-tender':
+      return rated.filter(function(s) { return getField(s, 'tenderness') !== null; })
+        .sort(function(a, b) { return getField(b, 'tenderness') - getField(a, 'tenderness'); }).slice(0, 10);
+    case 'best-value':
+      return rated.filter(function(s) { return s.cost_per_g && s.cost_per_g > 0; })
+        .sort(function(a, b) { return a.cost_per_g - b.cost_per_g; }).slice(0, 10);
+    case 'best-soup':
+      return rated.filter(function(s) { return getField(s, 'soup') !== null; })
+        .sort(function(a, b) { return getField(b, 'soup') - getField(a, 'soup'); }).slice(0, 10);
+    case 'ecoli-free':
+      return stalls.filter(function(s) { return s.ecoli === 'N'; });
+    default: return [];
+  }
+}
+
+function toggleQuickFilter(el) {
+  var qf = el.dataset.qf;
+  var pills = document.querySelectorAll('.qf-pill');
+  if (activeQuickFilter === qf) {
+    activeQuickFilter = null;
+    pills.forEach(function(p) { p.classList.remove('active'); });
+  } else {
+    activeQuickFilter = qf;
+    pills.forEach(function(p) { p.classList.toggle('active', p.dataset.qf === qf); });
+  }
+  renderMarkers();
+}
 
 var userLat = null, userLng = null, userMarker = null;
 
