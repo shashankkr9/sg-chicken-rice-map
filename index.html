@@ -719,6 +719,7 @@
     display: flex; gap: 12px; cursor: pointer;
     transition: all 0.1s ease;
   }
+  .lb-card { cursor: pointer; -webkit-tap-highlight-color: rgba(0,0,0,0.1); }
   .lb-card:hover { transform: translate(1px, 1px); box-shadow: 3px 3px 0 #000; }
   .lb-card:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #000; }
   body.dark .lb-card { background: #2a2a2a; border-color: #FFC107; box-shadow: 4px 4px 0 #FFC107; }
@@ -1584,12 +1585,17 @@ function renderLeaderboard() {
 }
 
 // Click handler for leaderboard cards
-document.getElementById('lb-cards').addEventListener('click', function(e) {
+function handleLbCardClick(e) {
   var card = e.target.closest('.lb-card');
   if (!card) return;
   var idx = parseInt(card.dataset.stallIdx);
   var s = stalls[idx];
   if (!s) return;
+
+  // Prevent double-fire from both click and touchend
+  if (card._lbHandled) return;
+  card._lbHandled = true;
+  setTimeout(function() { card._lbHandled = false; }, 500);
 
   // Close leaderboard first, then after repaint fly to stall
   toggleLeaderboard();
@@ -1621,6 +1627,15 @@ document.getElementById('lb-cards').addEventListener('click', function(e) {
       }, 900);
     }, 50);
   });
+}
+// Bind both click and touchend for iOS compatibility
+var lbCardsEl = document.getElementById('lb-cards');
+lbCardsEl.addEventListener('click', handleLbCardClick);
+lbCardsEl.addEventListener('touchend', function(e) {
+  // Only handle single-finger taps, not scrolls
+  if (e.changedTouches && e.changedTouches.length === 1) {
+    handleLbCardClick(e);
+  }
 });
 </script>
 <!-- Bottom sheet backdrop -->
