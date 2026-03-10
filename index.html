@@ -1216,29 +1216,41 @@ renderMarkers();
 updateFavCount();
 
 // Deep link: open stall from URL hash
+function openStallFromMarker(marker) {
+  var s = marker.stallData;
+  map.setView([s.lat, s.lng], 17);
+  if (window.innerWidth <= 640 && typeof openBottomSheet === 'function') {
+    openBottomSheet(s);
+    history.replaceState(null, '', '#' + stallSlug(s));
+    if (s.easter_egg) {
+      setTimeout(function() { document.getElementById('easter-egg').classList.add('show'); }, 800);
+    }
+  } else {
+    marker.openPopup();
+  }
+}
+
 function openFromHash() {
   var hash = window.location.hash.slice(1);
   if (!hash) return;
   hash = decodeURIComponent(hash);
+  // Exact match first
   for (var i = 0; i < markers.length; i++) {
     if (markers[i].stallSlug === hash) {
-      var s = markers[i].stallData;
-      map.setView([s.lat, s.lng], 17);
-      markers[i].openPopup();
+      openStallFromMarker(markers[i]);
       return;
     }
   }
-  // Fuzzy match: try to find partial match
+  // Fuzzy match: only if hash is contained in slug (not the reverse — avoids partial matches)
   for (var i = 0; i < markers.length; i++) {
-    if (markers[i].stallSlug.includes(hash) || hash.includes(markers[i].stallSlug)) {
-      var s = markers[i].stallData;
-      map.setView([s.lat, s.lng], 17);
-      markers[i].openPopup();
+    if (markers[i].stallSlug.includes(hash)) {
+      openStallFromMarker(markers[i]);
       return;
     }
   }
 }
-openFromHash();
+// Delay deep link to ensure markers are fully rendered
+setTimeout(openFromHash, 500);
 window.addEventListener('hashchange', openFromHash);
 </script>
 <!-- Bottom sheet backdrop -->
