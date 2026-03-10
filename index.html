@@ -1069,6 +1069,50 @@ function renderMarkers() {
   document.getElementById('visible-count').textContent = count;
 }
 
+// Smart zoom: when tapping a dense area and no marker registers the click, zoom in
+(function() {
+  var lastMarkerClick = 0;
+  // Track when a marker was clicked
+  map.on('layeradd', function() {}); // placeholder
+  
+  // Listen for marker clicks to set a flag
+  var origRenderMarkers = renderMarkers;
+  var markerClickFlag = false;
+  
+  // We'll use a different approach: listen to map click and check density
+  map.on('click', function(e) {
+    // Skip if we're already zoomed in enough
+    var zoom = map.getZoom();
+    if (zoom >= 16) return;
+    
+    // Skip on desktop — this is a mobile UX optimization
+    if (window.innerWidth > 640) return;
+    
+    // Find markers near the tap point
+    var tapPoint = map.latLngToContainerPoint(e.latlng);
+    var nearbyCount = 0;
+    var nearbyMarkers = [];
+    var tapRadius = 30; // pixels — touch target area
+    
+    for (var i = 0; i < markers.length; i++) {
+      var mPoint = map.latLngToContainerPoint(markers[i].getLatLng());
+      var dx = tapPoint.x - mPoint.x;
+      var dy = tapPoint.y - mPoint.y;
+      var dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < tapRadius) {
+        nearbyCount++;
+        nearbyMarkers.push(markers[i]);
+      }
+    }
+    
+    // If 2+ markers are within tap radius, it's a dense area — zoom in
+    if (nearbyCount >= 2) {
+      var targetZoom = Math.min(zoom + 3, 17);
+      map.flyTo(e.latlng, targetZoom, {duration: 0.4});
+    }
+  });
+})();
+
 document.getElementById('min-rating').addEventListener('input', function() {
   document.getElementById('rating-display').textContent = this.value;
   renderMarkers();
