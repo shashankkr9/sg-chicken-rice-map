@@ -628,6 +628,182 @@
     .fab-option-btn:active { transform: translate(2px, 2px); box-shadow: none; }
     body.dark .fab-option-btn { background: #2a2a2a; border-color: #FFC107; box-shadow: 2px 2px 0 #FFC107; }
   }
+
+  /* ─── LEADERBOARD ─── */
+  .lb-toggle {
+    display: flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; flex-shrink: 0;
+    background: #FFC107; border: 2px solid #000; border-radius: 8px;
+    font-size: 18px; cursor: pointer; box-shadow: 2px 2px 0 #000;
+    transition: all 0.1s ease;
+  }
+  .lb-toggle:hover { transform: translate(1px, 1px); box-shadow: 1px 1px 0 #000; }
+  .lb-toggle.active { background: #FF6B35; box-shadow: none; transform: translate(2px, 2px); }
+  body.dark .lb-toggle { border-color: #FFC107; box-shadow: 2px 2px 0 #FFC107; }
+  body.dark .lb-toggle.active { background: #FF6B35; box-shadow: none; }
+
+  .leaderboard-panel {
+    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 10001; background: #FFF8EF;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
+  .leaderboard-panel.active { display: block; }
+  body.dark .leaderboard-panel { background: #1a1a1a; }
+
+  .lb-header {
+    position: sticky; top: 0; z-index: 2;
+    background: #FFF8EF; padding: 12px 16px 8px;
+    border-bottom: 3px solid #000;
+  }
+  body.dark .lb-header { background: #1a1a1a; border-color: #FFC107; }
+
+  .lb-title-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .lb-title {
+    font-size: 20px; font-weight: 800; color: #1a1a1a;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  body.dark .lb-title { color: #fff; }
+  .lb-back {
+    background: #FFF8EF; border: 2px solid #000; border-radius: 8px;
+    padding: 6px 14px; font-size: 13px; font-weight: 700; cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+    box-shadow: 2px 2px 0 #000; transition: all 0.1s ease;
+  }
+  .lb-back:hover { transform: translate(1px, 1px); box-shadow: 1px 1px 0 #000; }
+  body.dark .lb-back { background: #2a2a2a; color: #fff; border-color: #FFC107; box-shadow: 2px 2px 0 #FFC107; }
+
+  .lb-sorts {
+    display: flex; gap: 6px; overflow-x: auto;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+  .lb-sorts::-webkit-scrollbar { display: none; }
+  .lb-sort-pill {
+    flex-shrink: 0; padding: 5px 12px;
+    background: #FFF8EF; color: #000; border: 2px solid #000;
+    border-radius: 20px; font-size: 11px; font-weight: 700;
+    font-family: 'Space Grotesk', sans-serif;
+    cursor: pointer; box-shadow: 2px 2px 0 #000;
+    transition: all 0.1s ease; white-space: nowrap;
+  }
+  .lb-sort-pill:hover { transform: translate(1px, 1px); box-shadow: 1px 1px 0 #000; }
+  .lb-sort-pill.active {
+    background: #FF6B35; color: #fff;
+    transform: translate(2px, 2px); box-shadow: none;
+  }
+  body.dark .lb-sort-pill { background: #2a2a2a; color: #fff; border-color: #FFC107; box-shadow: 2px 2px 0 #FFC107; }
+  body.dark .lb-sort-pill.active { background: #FF6B35; color: #fff; box-shadow: none; }
+
+  .lb-count {
+    font-size: 11px; color: #666; font-weight: 500; margin-top: 6px;
+  }
+  body.dark .lb-count { color: #aaa; }
+
+  .lb-cards {
+    padding: 12px 12px 80px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  @media (min-width: 641px) {
+    .lb-cards {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+      max-width: 800px; margin: 0 auto; padding: 16px 16px 80px;
+    }
+  }
+
+  .lb-card {
+    background: #fff; border: 3px solid #000; border-radius: 12px;
+    box-shadow: 4px 4px 0 #000; padding: 12px;
+    display: flex; gap: 12px; cursor: pointer;
+    transition: all 0.1s ease;
+  }
+  .lb-card:hover { transform: translate(1px, 1px); box-shadow: 3px 3px 0 #000; }
+  .lb-card:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #000; }
+  body.dark .lb-card { background: #2a2a2a; border-color: #FFC107; box-shadow: 4px 4px 0 #FFC107; }
+  body.dark .lb-card:hover { box-shadow: 3px 3px 0 #FFC107; }
+
+  .lb-rank {
+    font-size: 24px; font-weight: 800; color: #ccc;
+    min-width: 36px; display: flex; align-items: flex-start;
+    justify-content: center; padding-top: 2px;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  body.dark .lb-rank { color: #555; }
+  .lb-rank.top3 { color: #FF6B35; }
+
+  .lb-card-body { flex: 1; min-width: 0; }
+
+  .lb-card-top {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 4px; flex-wrap: wrap;
+  }
+  .lb-card-name {
+    font-size: 14px; font-weight: 700; color: #1a1a1a;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 180px;
+  }
+  body.dark .lb-card-name { color: #fff; }
+
+  .lb-badge {
+    display: inline-block; padding: 2px 8px;
+    border-radius: 12px; font-size: 12px; font-weight: 800;
+    color: #fff; border: 1.5px solid #000;
+  }
+  .lb-badge-red { background: #E53935; }
+  .lb-badge-orange { background: #FF6B35; }
+  .lb-badge-yellow { background: #FFC107; color: #000; }
+  .lb-badge-green { background: #28a745; }
+  .lb-badge-blue { background: #17a2b8; }
+
+  .lb-type-tag {
+    font-size: 10px; font-weight: 700; color: #888;
+    background: #f0f0f0; padding: 1px 6px; border-radius: 4px;
+    border: 1px solid #ddd;
+  }
+  body.dark .lb-type-tag { background: #333; color: #aaa; border-color: #555; }
+
+  .lb-address {
+    font-size: 11px; color: #888; font-weight: 500;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    margin-bottom: 6px;
+  }
+  body.dark .lb-address { color: #777; }
+
+  .lb-bars {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 3px 12px;
+  }
+  .lb-bar-item {
+    display: flex; align-items: center; gap: 4px; font-size: 10px;
+  }
+  .lb-bar-label { color: #888; font-weight: 500; min-width: 26px; }
+  body.dark .lb-bar-label { color: #777; }
+  .lb-bar-track {
+    flex: 1; height: 6px; background: #eee; border-radius: 3px;
+    overflow: hidden;
+  }
+  body.dark .lb-bar-track { background: #333; }
+  .lb-bar-fill {
+    height: 100%; border-radius: 3px;
+    transition: width 0.3s ease;
+  }
+  .lb-bar-val { font-weight: 700; color: #1a1a1a; min-width: 16px; font-size: 10px; }
+  body.dark .lb-bar-val { color: #fff; }
+
+  /* Hide map controls when leaderboard is open */
+  body.lb-open .search-bar,
+  body.lb-open .search-results,
+  body.lb-open .quick-filters,
+  body.lb-open .fab-menu,
+  body.lb-open .info-panel,
+  body.lb-open .filter-bar,
+  body.lb-open .count-badge,
+  body.lb-open .nearme-btn,
+  body.lb-open .darkmode-btn,
+  body.lb-open .credit-bar,
+  body.lb-open .bottom-sheet,
+  body.lb-open .bs-backdrop { display: none !important; }
 </style>
 </head>
 <body>
@@ -637,6 +813,7 @@
   <span class="search-icon">🔍</span>
   <input type="text" id="search-input" placeholder="Search 198 stalls..." aria-label="Search by stall name or area">
   <div class="filter-toggle" id="filter-toggle" onclick="toggleFilterPills()">🏷️</div>
+  <button class="lb-toggle" id="lb-toggle" onclick="toggleLeaderboard()" aria-label="Leaderboard">🏆</button>
 </div>
 <div class="search-results" id="search-results"></div>
 <div class="quick-filters" id="quick-filters">
@@ -657,6 +834,10 @@
 <!-- Mobile FAB menu (⚡ expands to Near Me + Dark Mode) -->
 <div class="fab-menu" id="fab-menu">
   <div class="fab-options" id="fab-options">
+    <div class="fab-option">
+      <span class="fab-option-label">Leaderboard</span>
+      <button class="fab-option-btn" onclick="toggleLeaderboard();closeFab()" aria-label="Leaderboard">🏆</button>
+    </div>
     <div class="fab-option">
       <span class="fab-option-label">Near Me</span>
       <button class="fab-option-btn" onclick="findNearMe();closeFab()" aria-label="Find nearest stall">📍</button>
@@ -1216,13 +1397,14 @@ renderMarkers();
 updateFavCount();
 
 // Deep link: open stall from URL hash
-function openStallFromMarker(marker) {
+function openStallFromMarker(marker, fromDeepLink) {
   var s = marker.stallData;
   map.setView([s.lat, s.lng], 17);
   if (window.innerWidth <= 640 && typeof openBottomSheet === 'function') {
     openBottomSheet(s);
     history.replaceState(null, '', '#' + stallSlug(s));
-    if (s.easter_egg) {
+    // Easter egg only fires on organic discovery (search, map click, filter) — not deep links
+    if (s.easter_egg && !fromDeepLink) {
       setTimeout(function() { document.getElementById('easter-egg').classList.add('show'); }, 800);
     }
   } else {
@@ -1237,14 +1419,14 @@ function openFromHash() {
   // Exact match first
   for (var i = 0; i < markers.length; i++) {
     if (markers[i].stallSlug === hash) {
-      openStallFromMarker(markers[i]);
+      openStallFromMarker(markers[i], true);
       return;
     }
   }
   // Fuzzy match: only if hash is contained in slug (not the reverse — avoids partial matches)
   for (var i = 0; i < markers.length; i++) {
     if (markers[i].stallSlug.includes(hash)) {
-      openStallFromMarker(markers[i]);
+      openStallFromMarker(markers[i], true);
       return;
     }
   }
@@ -1252,11 +1434,178 @@ function openFromHash() {
 // Delay deep link to ensure markers are fully rendered
 setTimeout(openFromHash, 500);
 window.addEventListener('hashchange', openFromHash);
+
+/* ─── LEADERBOARD ─── */
+var lbOpen = false;
+var lbSort = 'overall';
+
+function toggleLeaderboard() {
+  lbOpen = !lbOpen;
+  var panel = document.getElementById('leaderboard-panel');
+  var toggle = document.getElementById('lb-toggle');
+  if (lbOpen) {
+    document.body.classList.add('lb-open');
+    panel.classList.add('active');
+    if (toggle) toggle.classList.add('active');
+    renderLeaderboard();
+  } else {
+    document.body.classList.remove('lb-open');
+    panel.classList.remove('active');
+    if (toggle) toggle.classList.remove('active');
+  }
+}
+
+function setLbSort(el) {
+  lbSort = el.dataset.sort;
+  document.querySelectorAll('.lb-sort-pill').forEach(function(p) {
+    p.classList.toggle('active', p.dataset.sort === lbSort);
+  });
+  renderLeaderboard();
+}
+
+function getLbSortValue(s, sortKey) {
+  switch (sortKey) {
+    case 'overall': return parseFloat(getAvgRating(s)) || 0;
+    case 'tenderness': return getField(s, 'tenderness') || 0;
+    case 'rice': return getField(s, 'rice') || 0;
+    case 'chilli': return getField(s, 'chilli') || 0;
+    case 'soup': return getField(s, 'soup') || 0;
+    case 'cost': return s.cost ? parseFloat(s.cost) : 9999;
+    case 'value': return s.cost_per_g ? parseFloat(s.cost_per_g) : 9999;
+    default: return 0;
+  }
+}
+
+function getBadgeClass(rating) {
+  var r = parseFloat(rating);
+  if (r >= 9) return 'lb-badge-red';
+  if (r >= 8) return 'lb-badge-orange';
+  if (r >= 7) return 'lb-badge-yellow';
+  if (r >= 6) return 'lb-badge-green';
+  return 'lb-badge-blue';
+}
+
+function ratingBarColor(val) {
+  if (val >= 9) return '#E53935';
+  if (val >= 8) return '#FF6B35';
+  if (val >= 7) return '#FFC107';
+  if (val >= 6) return '#28a745';
+  return '#17a2b8';
+}
+
+function renderLeaderboard() {
+  var rated = stalls.filter(function(s) { return s.rating_angel !== null && s.rating_angel !== undefined && s.rating_angel !== 'None'; });
+  var ascending = (lbSort === 'cost' || lbSort === 'value');
+
+  rated.sort(function(a, b) {
+    var va = getLbSortValue(a, lbSort);
+    var vb = getLbSortValue(b, lbSort);
+    return ascending ? va - vb : vb - va;
+  });
+
+  document.getElementById('lb-count').textContent = rated.length + ' rated stalls';
+
+  var container = document.getElementById('lb-cards');
+  var html = '';
+
+  rated.forEach(function(s, i) {
+    var avg = getAvgRating(s);
+    var rank = i + 1;
+    var badgeClass = avg ? getBadgeClass(avg) : 'lb-badge-blue';
+    var tend = getField(s, 'tenderness');
+    var rice = getField(s, 'rice');
+    var chil = getField(s, 'chilli');
+    var soup = getField(s, 'soup');
+    var addr = s.address || '';
+    if (addr.length > 45) addr = addr.substring(0, 45) + '…';
+
+    var sortLabel = '';
+    if (lbSort === 'cost' && s.cost) sortLabel = ' · $' + parseFloat(s.cost).toFixed(2);
+    if (lbSort === 'value' && s.cost_per_g) sortLabel = ' · $' + parseFloat(s.cost_per_g).toFixed(3) + '/g';
+
+    html += '<div class="lb-card" data-stall-idx="' + stalls.indexOf(s) + '">';
+    html += '<div class="lb-rank' + (rank <= 3 ? ' top3' : '') + '">#' + rank + '</div>';
+    html += '<div class="lb-card-body">';
+    html += '<div class="lb-card-top">';
+    html += '<span class="lb-card-name">' + s.name + '</span>';
+    html += '<span class="lb-badge ' + badgeClass + '">' + (avg || '-') + '</span>';
+    html += '<span class="lb-type-tag">' + (s.type || '') + '</span>';
+    html += '</div>';
+    html += '<div class="lb-address">' + addr + sortLabel + '</div>';
+    html += '<div class="lb-bars">';
+
+    var bars = [
+      {label: '🍗', val: tend},
+      {label: '🍚', val: rice},
+      {label: '🌶️', val: chil},
+      {label: '🍜', val: soup}
+    ];
+    bars.forEach(function(b) {
+      var v = b.val;
+      var pct = v ? (v / 10 * 100) : 0;
+      html += '<div class="lb-bar-item">';
+      html += '<span class="lb-bar-label">' + b.label + '</span>';
+      html += '<div class="lb-bar-track"><div class="lb-bar-fill" style="width:' + pct + '%;background:' + (v ? ratingBarColor(v) : '#ccc') + '"></div></div>';
+      html += '<span class="lb-bar-val">' + (v ? v.toFixed(1) : '-') + '</span>';
+      html += '</div>';
+    });
+
+    html += '</div></div></div>';
+  });
+
+  container.innerHTML = html;
+}
+
+// Click handler for leaderboard cards
+document.getElementById('lb-cards').addEventListener('click', function(e) {
+  var card = e.target.closest('.lb-card');
+  if (!card) return;
+  var idx = parseInt(card.dataset.stallIdx);
+  var s = stalls[idx];
+  if (!s) return;
+
+  // Close leaderboard
+  toggleLeaderboard();
+
+  // Fly to stall and open popup/bottom sheet
+  map.flyTo([s.lat, s.lng], 17, {duration: 0.8});
+  setTimeout(function() {
+    for (var i = 0; i < markers.length; i++) {
+      var ll = markers[i].getLatLng();
+      if (Math.abs(ll.lat - s.lat) < 0.0001 && Math.abs(ll.lng - s.lng) < 0.0001) {
+        markers[i].openPopup();
+        history.replaceState(null, '', '#' + stallSlug(s));
+        break;
+      }
+    }
+  }, 900);
+});
 </script>
 <!-- Bottom sheet backdrop -->
 <div class="bs-backdrop" id="bs-backdrop" onclick="closeBottomSheet()"></div>
 <!-- Bottom sheet: replaces Leaflet popup on mobile -->
 <div class="bottom-sheet" id="bottom-sheet"></div>
+
+<!-- Leaderboard panel -->
+<div class="leaderboard-panel" id="leaderboard-panel">
+  <div class="lb-header">
+    <div class="lb-title-row">
+      <div class="lb-title">🏆 Leaderboard</div>
+      <button class="lb-back" onclick="toggleLeaderboard()">← Back to Map</button>
+    </div>
+    <div class="lb-sorts" id="lb-sorts">
+      <div class="lb-sort-pill active" data-sort="overall" onclick="setLbSort(this)">⭐ Overall</div>
+      <div class="lb-sort-pill" data-sort="tenderness" onclick="setLbSort(this)">🍗 Tender</div>
+      <div class="lb-sort-pill" data-sort="rice" onclick="setLbSort(this)">🍚 Rice</div>
+      <div class="lb-sort-pill" data-sort="chilli" onclick="setLbSort(this)">🌶️ Chilli</div>
+      <div class="lb-sort-pill" data-sort="soup" onclick="setLbSort(this)">🍜 Soup</div>
+      <div class="lb-sort-pill" data-sort="cost" onclick="setLbSort(this)">💲 Cheapest</div>
+      <div class="lb-sort-pill" data-sort="value" onclick="setLbSort(this)">💰 Best Value</div>
+    </div>
+    <div class="lb-count" id="lb-count"></div>
+  </div>
+  <div class="lb-cards" id="lb-cards"></div>
+</div>
 
 <div class="credit-bar">Data by <a href="https://www.youtube.com/@angelhsu" target="_blank">Angel Hsu</a> · Map by <a href="https://bestchickenricesg.com">bestchickenricesg.com</a></div>
 <div class="easter-egg-overlay" id="easter-egg" onclick="if(event.target===this)this.classList.remove('show')">
