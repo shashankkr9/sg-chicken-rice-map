@@ -97,6 +97,26 @@
     color: #1a1a1a;
   }
   .info-panel h2 span { color: #FF6B35; }
+  .attribution {
+    margin: 8px 0; padding: 8px 10px; background: #FFF8EF;
+    border: 2px solid #000; border-radius: 8px; font-size: 12px;
+    box-shadow: 2px 2px 0 #000;
+  }
+  .attribution a {
+    color: #FF6B35; font-weight: 700; text-decoration: none;
+  }
+  .attribution a:hover { text-decoration: underline; }
+  .attribution-sub {
+    display: block; font-size: 10px; color: #888; margin-top: 2px;
+  }
+  .credit-bar {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 999;
+    background: #000; color: #fff; text-align: center;
+    font-size: 11px; padding: 4px 8px;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .credit-bar a { color: #FFC107; text-decoration: none; font-weight: 600; }
+  .credit-bar a:hover { text-decoration: underline; }
   .info-panel p {
     color: #333; margin-bottom: 10px; line-height: 1.45;
     font-weight: 500; font-size: 12px;
@@ -112,7 +132,7 @@
 
   /* ─── FILTER BAR ─── */
   .filter-bar {
-    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+    position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
     z-index: 1000; background: #FFF8EF; padding: 10px 16px;
     border: 3px solid #000; border-radius: 12px;
     box-shadow: 4px 4px 0 #000;
@@ -143,6 +163,20 @@
     padding: 3px 10px; border: 2px solid #000; border-radius: 6px;
     box-shadow: 2px 2px 0 #000;
   }
+  .popup-actions {
+    display: flex; gap: 6px; margin-top: 8px;
+  }
+  .popup-actions .share-btn { margin-top: 0; flex: 1; }
+  .directions-btn {
+    flex: 1; display: block; text-align: center; padding: 6px 12px;
+    background: #FFC107; color: #000; border: 2px solid #000;
+    border-radius: 8px; font-weight: 700; font-size: 12px;
+    font-family: 'Space Grotesk', sans-serif;
+    cursor: pointer; box-shadow: 2px 2px 0 #000;
+    text-decoration: none;
+    transition: all 0.1s ease;
+  }
+  .directions-btn:hover { transform: translate(1px, 1px); box-shadow: 1px 1px 0 #000; }
   .share-btn {
     display: block; width: 100%; margin-top: 8px; padding: 6px 12px;
     background: #FF6B35; color: #fff; border: 2px solid #000;
@@ -311,7 +345,11 @@
 
 <div class="info-panel">
   <h2>🍗 <span>SG</span> Chicken Rice Map</h2>
-  <p>Angel Hsu's review of 198 chicken rice stalls. Rated on tenderness, rice, chilli, soup & hygiene.</p>
+  <p>198 chicken rice stalls rated on tenderness, rice, chilli, soup & hygiene.</p>
+  <div class="attribution">
+    <strong>Data by</strong> <a href="https://www.youtube.com/@angelhsu" target="_blank" rel="noopener">Angel Hsu 🎥</a>
+    <span class="attribution-sub">100-stall chicken rice review series on YouTube</span>
+  </div>
   <div class="legend">
     <div class="legend-item"><div class="legend-dot" style="background:#ff0000"></div>9–10</div>
     <div class="legend-item"><div class="legend-dot" style="background:#ff6b35"></div>8–9</div>
@@ -416,7 +454,10 @@ function makePopup(s) {
   html += '</div>';
   html += ecoliBadge(s);
   if (s.remarks && s.remarks !== 'None') html += '<div class="remarks">' + s.remarks + '</div>';
+  html += '<div class="popup-actions">';
+  html += '<a class="directions-btn" href="https://www.google.com/maps/dir/?api=1&destination=' + s.lat + ',' + s.lng + '" target="_blank" rel="noopener">📍 Directions</a>';
   html += '<button class="share-btn" onclick="this.classList.add(\'share-btn-active\');shareStall(stalls[' + stalls.indexOf(s) + '])">🔗 Share</button>';
+  html += '</div>';
   html += '</div>';
   return html;
 }
@@ -559,6 +600,7 @@ function openFromHash() {
 openFromHash();
 window.addEventListener('hashchange', openFromHash);
 </script>
+<div class="credit-bar">Data by <a href="https://www.youtube.com/@angelhsu" target="_blank">Angel Hsu</a> · Map by <a href="https://bestchickenricesg.com">bestchickenricesg.com</a></div>
 <div class="easter-egg-overlay" id="easter-egg" onclick="if(event.target===this)this.classList.remove('show')">
   <div class="easter-egg-card">
     <div class="egg-emoji">🐔💕</div>
