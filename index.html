@@ -143,6 +143,16 @@
     padding: 3px 10px; border: 2px solid #000; border-radius: 6px;
     box-shadow: 2px 2px 0 #000;
   }
+  .share-btn {
+    display: block; width: 100%; margin-top: 8px; padding: 6px 12px;
+    background: #FF6B35; color: #fff; border: 2px solid #000;
+    border-radius: 8px; font-weight: 700; font-size: 12px;
+    font-family: 'Space Grotesk', sans-serif;
+    cursor: pointer; box-shadow: 2px 2px 0 #000;
+    transition: all 0.1s ease;
+  }
+  .share-btn:hover { transform: translate(1px, 1px); box-shadow: 1px 1px 0 #000; }
+  .share-btn:active { transform: translate(2px, 2px); box-shadow: none; }
   .stall-popup .remarks {
     font-size: 11px; color: #333; margin-top: 6px;
     font-style: italic; font-weight: 500;
@@ -341,6 +351,22 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
   maxZoom: 20
 }).addTo(map);
 
+function stallSlug(s) {
+  return s.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+function shareStall(s) {
+  const url = window.location.origin + window.location.pathname + '#' + stallSlug(s);
+  if (navigator.share) {
+    navigator.share({ title: s.name + ' — Chicken Rice Map', text: 'Check out ' + s.name + ' on the SG Chicken Rice Map!', url: url });
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(function() {
+      var btn = document.querySelector('.share-btn-active');
+      if (btn) { btn.textContent = '✅ Copied!'; setTimeout(function() { btn.textContent = '🔗 Share'; }, 2000); }
+    });
+  }
+}
+
 function getRatingColor(rating) {
   if (rating === null || rating === undefined || rating === 'None') return '#6c757d';
   const r = parseFloat(rating);
@@ -390,6 +416,7 @@ function makePopup(s) {
   html += '</div>';
   html += ecoliBadge(s);
   if (s.remarks && s.remarks !== 'None') html += '<div class="remarks">' + s.remarks + '</div>';
+  html += '<button class="share-btn" onclick="this.classList.add(\'share-btn-active\');shareStall(stalls[' + stalls.indexOf(s) + '])">🔗 Share</button>';
   html += '</div>';
   return html;
 }
@@ -425,11 +452,17 @@ function renderMarkers() {
       fillOpacity: 0.85
     }).bindPopup(makePopup(s), {maxWidth: 300});
     
-    if (s.easter_egg) {
-      marker.on('popupopen', function() {
+    marker.on('popupopen', function() {
+      history.replaceState(null, '', '#' + stallSlug(s));
+      if (s.easter_egg) {
         setTimeout(function() { document.getElementById('easter-egg').classList.add('show'); }, 800);
-      });
-    }
+      }
+    });
+    marker.on('popupclose', function() {
+      history.replaceState(null, '', window.location.pathname);
+    });
+    marker.stallSlug = stallSlug(s);
+    marker.stallData = s;
     marker.addTo(map);
     markers.push(marker);
     count++;
@@ -499,6 +532,32 @@ document.addEventListener('click', function(e) {
 });
 
 renderMarkers();
+
+// Deep link: open stall from URL hash
+function openFromHash() {
+  var hash = window.location.hash.slice(1);
+  if (!hash) return;
+  hash = decodeURIComponent(hash);
+  for (var i = 0; i < markers.length; i++) {
+    if (markers[i].stallSlug === hash) {
+      var s = markers[i].stallData;
+      map.setView([s.lat, s.lng], 17);
+      markers[i].openPopup();
+      return;
+    }
+  }
+  // Fuzzy match: try to find partial match
+  for (var i = 0; i < markers.length; i++) {
+    if (markers[i].stallSlug.includes(hash) || hash.includes(markers[i].stallSlug)) {
+      var s = markers[i].stallData;
+      map.setView([s.lat, s.lng], 17);
+      markers[i].openPopup();
+      return;
+    }
+  }
+}
+openFromHash();
+window.addEventListener('hashchange', openFromHash);
 </script>
 <div class="easter-egg-overlay" id="easter-egg" onclick="if(event.target===this)this.classList.remove('show')">
   <div class="easter-egg-card">
