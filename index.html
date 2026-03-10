@@ -109,6 +109,23 @@
   .attribution-sub {
     display: block; font-size: 10px; color: #888; margin-top: 2px;
   }
+  .nearme-btn {
+    position: absolute; top: 72px; right: 10px; z-index: 1000;
+    background: #FFC107; color: #000; border: 3px solid #000;
+    border-radius: 10px; padding: 8px 14px;
+    font-weight: 800; font-size: 13px; cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+    box-shadow: 3px 3px 0 #000;
+    transition: all 0.1s ease;
+  }
+  .nearme-btn:hover { transform: translate(1px, 1px); box-shadow: 2px 2px 0 #000; }
+  .nearme-btn:active { transform: translate(3px, 3px); box-shadow: none; }
+  .nearme-btn.loading { opacity: 0.6; pointer-events: none; }
+  .distance-tag {
+    display: inline-block; background: #FFC107; color: #000;
+    border: 1.5px solid #000; border-radius: 4px;
+    font-size: 10px; font-weight: 700; padding: 1px 5px; margin-left: 4px;
+  }
   .credit-bar {
     position: fixed; bottom: 0; left: 0; right: 0; z-index: 999;
     background: #000; color: #fff; text-align: center;
@@ -293,6 +310,7 @@
     }
     .search-results .result-item { padding: 14px 16px; }
     .info-panel { display: none; }
+    .nearme-btn { top: auto; bottom: 110px; right: 10px; font-size: 12px; padding: 8px 12px; }
     .count-badge {
       top: auto; bottom: 90px; left: 10px; font-size: 12px;
       padding: 5px 12px;
@@ -341,6 +359,7 @@
 </div>
 <div class="search-results" id="search-results"></div>
 
+<button class="nearme-btn" id="nearme-btn" onclick="findNearMe()">📍 Near Me</button>
 <div class="count-badge"><span id="visible-count">198</span> / 198 stalls</div>
 
 <div class="info-panel">
@@ -442,7 +461,12 @@ function makePopup(s) {
   
   let html = '<div class="stall-popup">';
   html += '<h3>' + s.name + '</h3>';
-  html += '<div class="meta">' + s.type + ' · ' + s.hours + '<br>' + s.address + '</div>';
+  var distTag = '';
+  if (userLat !== null) {
+    var dist = haversine(userLat, userLng, s.lat, s.lng);
+    distTag = ' <span class="distance-tag">' + formatDist(dist) + '</span>';
+  }
+  html += '<div class="meta">' + s.type + ' · ' + s.hours + distTag + '<br>' + s.address + '</div>';
   html += '<div class="overall">Overall: ' + (avg || 'N/A') + '/10</div>';
   html += '<div class="ratings">';
   html += '<span class="rating-label">Tenderness</span><span class="rating-val">' + (s.tenderness_angel || '-') + '</span>';
@@ -571,6 +595,70 @@ document.addEventListener('click', function(e) {
     searchResults.style.display = 'none';
   }
 });
+
+var userLat = null, userLng = null, userMarker = null;
+
+function haversine(lat1, lng1, lat2, lng2) {
+  var R = 6371000;
+  var dLat = (lat2 - lat1) * Math.PI / 180;
+  var dLng = (lng2 - lng1) * Math.PI / 180;
+  var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng/2) * Math.sin(dLng/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function formatDist(m) {
+  return m < 1000 ? Math.round(m) + 'm' : (m/1000).toFixed(1) + 'km';
+}
+
+function findNearMe() {
+  var btn = document.getElementById('nearme-btn');
+  btn.classList.add('loading');
+  btn.textContent = '📍 Locating...';
+
+  if (!navigator.geolocation) {
+    btn.textContent = '📍 Not supported';
+    btn.classList.remove('loading');
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    userLat = pos.coords.latitude;
+    userLng = pos.coords.longitude;
+
+    if (userMarker) map.removeLayer(userMarker);
+    userMarker = L.circleMarker([userLat, userLng], {
+      radius: 10, fillColor: '#4285F4', color: '#fff',
+      weight: 3, fillOpacity: 1
+    }).addTo(map).bindPopup('<b>You are here</b>');
+
+    // Sort stalls by distance and find nearest visible
+    var nearest = [];
+    markers.forEach(function(m) {
+      var ll = m.getLatLng();
+      var dist = haversine(userLat, userLng, ll.lat, ll.lng);
+      nearest.push({ marker: m, dist: dist });
+    });
+    nearest.sort(function(a, b) { return a.dist - b.dist; });
+
+    if (nearest.length > 0) {
+      var n = nearest[0];
+      map.setView(n.marker.getLatLng(), 15);
+      n.marker.openPopup();
+    }
+
+    btn.textContent = '📍 Near Me';
+    btn.classList.remove('loading');
+
+    // Re-render to add distance tags
+    renderMarkers();
+  }, function(err) {
+    btn.textContent = '📍 Denied';
+    btn.classList.remove('loading');
+    setTimeout(function() { btn.textContent = '📍 Near Me'; }, 2000);
+  }, { enableHighAccuracy: true, timeout: 10000 });
+}
 
 renderMarkers();
 
