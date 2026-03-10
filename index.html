@@ -11,7 +11,7 @@
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
   #map { width: 100%; height: 100vh; }
   .info-panel {
-    position: absolute; top: 10px; right: 10px; z-index: 1000;
+    position: absolute; top: 60px; right: 10px; z-index: 1000;
     background: white; padding: 12px 16px; border-radius: 12px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.15); max-width: 300px;
     font-size: 13px;
@@ -21,6 +21,33 @@
   .legend { display: flex; flex-wrap: wrap; gap: 6px; }
   .legend-item { display: flex; align-items: center; gap: 4px; font-size: 11px; }
   .legend-dot { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.2); }
+  .search-bar {
+    position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+    z-index: 1000; background: white; padding: 8px 12px; border-radius: 30px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15); display: flex; gap: 8px; align-items: center;
+    width: 90%; max-width: 500px;
+  }
+  .search-bar input {
+    flex: 1; padding: 8px 12px; border: 1px solid #eee; border-radius: 20px;
+    font-size: 14px; outline: none; background: #f8f8f8;
+  }
+  .search-bar input:focus { border-color: #ff6b35; background: white; }
+  .search-bar .search-icon { font-size: 16px; opacity: 0.5; }
+  .search-results {
+    position: absolute; top: 52px; left: 50%; transform: translateX(-50%);
+    z-index: 1001; background: white; border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15); width: 90%; max-width: 500px;
+    max-height: 300px; overflow-y: auto; display: none;
+  }
+  .search-results .result-item {
+    padding: 10px 16px; cursor: pointer; border-bottom: 1px solid #f0f0f0;
+    font-size: 13px;
+  }
+  .search-results .result-item:hover { background: #fff5f0; }
+  .search-results .result-item:last-child { border-bottom: none; }
+  .search-results .result-name { font-weight: 600; color: #1a1a1a; }
+  .search-results .result-meta { color: #888; font-size: 11px; margin-top: 2px; }
+  .search-results .result-rating { float: right; font-weight: 700; color: #ff6b35; }
   .filter-bar {
     position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
     z-index: 1000; background: white; padding: 8px 16px; border-radius: 30px;
@@ -44,7 +71,7 @@
   .ecoli-warn { background: #fff3cd; color: #856404; }
   .ecoli-bad { background: #f8d7da; color: #721c24; }
   .count-badge {
-    position: absolute; top: 10px; left: 10px; z-index: 1000;
+    position: absolute; top: 60px; left: 10px; z-index: 1000;
     background: #ff6b35; color: white; padding: 6px 14px; border-radius: 20px;
     font-weight: 700; font-size: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   }
@@ -52,6 +79,11 @@
 </head>
 <body>
 <div id="map"></div>
+<div class="search-bar">
+  <span class="search-icon">🔍</span>
+  <input type="text" id="search-input" placeholder="Search by stall name or area...">
+</div>
+<div class="search-results" id="search-results"></div>
 <div class="count-badge"><span id="visible-count">198</span> / 198 stalls</div>
 <div class="info-panel">
   <h2>🍗 SG Chicken Rice Map</h2>
@@ -186,6 +218,56 @@ document.getElementById('min-rating').addEventListener('input', function() {
 });
 document.getElementById('type-filter').addEventListener('change', renderMarkers);
 document.getElementById('ecoli-filter').addEventListener('change', renderMarkers);
+
+// Search functionality
+const searchInput = document.getElementById('search-input');
+const searchResults = document.getElementById('search-results');
+
+searchInput.addEventListener('input', function() {
+  const q = this.value.trim().toLowerCase();
+  if (q.length < 2) { searchResults.style.display = 'none'; return; }
+
+  const matches = stalls.filter(s => {
+    const name = (s.name || '').toLowerCase();
+    const addr = (s.address || '').toLowerCase();
+    return name.includes(q) || addr.includes(q);
+  }).slice(0, 15);
+
+  if (matches.length === 0) {
+    searchResults.innerHTML = '<div class="result-item"><span class="result-name">No results found</span></div>';
+  } else {
+    searchResults.innerHTML = matches.map((s, i) => {
+      const avg = getAvgRating(s);
+      return '<div class="result-item" data-idx="' + stalls.indexOf(s) + '">' +
+        '<span class="result-rating">' + (avg || '-') + '</span>' +
+        '<div class="result-name">' + s.name + '</div>' +
+        '<div class="result-meta">' + s.address + '</div></div>';
+    }).join('');
+  }
+  searchResults.style.display = 'block';
+});
+
+searchResults.addEventListener('click', function(e) {
+  const item = e.target.closest('.result-item');
+  if (!item || !item.dataset.idx) return;
+  const s = stalls[parseInt(item.dataset.idx)];
+  map.setView([s.lat, s.lng], 17);
+  // Find and open the matching marker popup
+  markers.forEach(m => {
+    const ll = m.getLatLng();
+    if (Math.abs(ll.lat - s.lat) < 0.0001 && Math.abs(ll.lng - s.lng) < 0.0001) {
+      m.openPopup();
+    }
+  });
+  searchResults.style.display = 'none';
+  searchInput.value = s.name;
+});
+
+document.addEventListener('click', function(e) {
+  if (!searchResults.contains(e.target) && e.target !== searchInput) {
+    searchResults.style.display = 'none';
+  }
+});
 
 renderMarkers();
 </script>
