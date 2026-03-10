@@ -1031,6 +1031,7 @@ function renderMarkers() {
     if (window.innerWidth <= 640) {
       // Mobile: use bottom sheet instead of Leaflet popup
       marker.on('click', function() {
+        if (checkDenseAndZoom(marker)) return; // dense cluster — zoom instead
         openBottomSheet(s);
         history.replaceState(null, '', '#' + stallSlug(s));
         if (s.easter_egg) {
@@ -1069,73 +1070,30 @@ function renderMarkers() {
   document.getElementById('visible-count').textContent = count;
 }
 
-// Smart zoom: when tapping a dense area and no marker captures the touch, zoom in
-(function() {
-  if (window.innerWidth > 640) return; // Desktop doesn't need this
+// Smart zoom: check marker density before opening bottom sheet
+// If tapped area has 2+ markers within touch radius and zoom < 16, zoom in instead
+function checkDenseAndZoom(clickedMarker) {
+  if (window.innerWidth > 640) return false; // desktop — skip
+  var zoom = map.getZoom();
+  if (zoom >= 16) return false; // zoomed in enough, let marker open normally
   
-  var mapEl = document.getElementById('map');
-  var touchStart = null;
-  var touchStartTime = 0;
-  var markerClicked = false;
+  var clickPoint = map.latLngToContainerPoint(clickedMarker.getLatLng());
+  var nearbyCount = 0;
+  var tapRadius = 35;
   
-  // Detect when a marker actually handled the tap
-  markers.forEach(function() {}); // markers re-created on render, so we track via flag
-  var origOpenBottomSheet = window.openBottomSheet;
-  window.openBottomSheet = function(s) {
-    markerClicked = true;
-    return origOpenBottomSheet(s);
-  };
+  for (var i = 0; i < markers.length; i++) {
+    var mPoint = map.latLngToContainerPoint(markers[i].getLatLng());
+    var dx = clickPoint.x - mPoint.x;
+    var dy = clickPoint.y - mPoint.y;
+    if (Math.sqrt(dx * dx + dy * dy) < tapRadius) nearbyCount++;
+  }
   
-  mapEl.addEventListener('touchstart', function(e) {
-    if (e.touches.length !== 1) return; // ignore pinch
-    touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    touchStartTime = Date.now();
-    markerClicked = false;
-  }, { passive: true });
-  
-  mapEl.addEventListener('touchend', function(e) {
-    if (!touchStart) return;
-    if (e.changedTouches.length !== 1) return;
-    
-    var dt = Date.now() - touchStartTime;
-    if (dt > 300) { touchStart = null; return; } // not a tap, was a long press or drag
-    
-    var dx = e.changedTouches[0].clientX - touchStart.x;
-    var dy = e.changedTouches[0].clientY - touchStart.y;
-    if (Math.sqrt(dx * dx + dy * dy) > 15) { touchStart = null; return; } // was a drag
-    
-    var tapX = e.changedTouches[0].clientX;
-    var tapY = e.changedTouches[0].clientY;
-    touchStart = null;
-    
-    // Wait a tick to see if a marker handled this tap
-    setTimeout(function() {
-      if (markerClicked) return; // marker got it, don't zoom
-      
-      var zoom = map.getZoom();
-      if (zoom >= 16) return; // already zoomed in enough
-      
-      // Convert tap screen coords to map container coords
-      var rect = mapEl.getBoundingClientRect();
-      var containerPoint = L.point(tapX - rect.left, tapY - rect.top);
-      var latlng = map.containerPointToLatLng(containerPoint);
-      
-      // Count markers near tap point
-      var nearbyCount = 0;
-      var tapRadius = 35; // pixels
-      for (var i = 0; i < markers.length; i++) {
-        var mPoint = map.latLngToContainerPoint(markers[i].getLatLng());
-        var ddx = containerPoint.x - mPoint.x;
-        var ddy = containerPoint.y - mPoint.y;
-        if (Math.sqrt(ddx * ddx + ddy * ddy) < tapRadius) nearbyCount++;
-      }
-      
-      if (nearbyCount >= 2) {
-        map.flyTo(latlng, Math.min(zoom + 3, 17), { duration: 0.4 });
-      }
-    }, 80); // 80ms — enough for marker click to fire first
-  }, { passive: true });
-})();
+  if (nearbyCount >= 2) {
+    map.flyTo(clickedMarker.getLatLng(), Math.min(zoom + 3, 17), { duration: 0.4 });
+    return true; // consumed — don't open bottom sheet
+  }
+  return false;
+}
 
 document.getElementById('min-rating').addEventListener('input', function() {
   document.getElementById('rating-display').textContent = this.value;
