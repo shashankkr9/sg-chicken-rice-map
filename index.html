@@ -1069,48 +1069,72 @@ function renderMarkers() {
   document.getElementById('visible-count').textContent = count;
 }
 
-// Smart zoom: when tapping a dense area and no marker registers the click, zoom in
+// Smart zoom: when tapping a dense area and no marker captures the touch, zoom in
 (function() {
-  var lastMarkerClick = 0;
-  // Track when a marker was clicked
-  map.on('layeradd', function() {}); // placeholder
+  if (window.innerWidth > 640) return; // Desktop doesn't need this
   
-  // Listen for marker clicks to set a flag
-  var origRenderMarkers = renderMarkers;
-  var markerClickFlag = false;
+  var mapEl = document.getElementById('map');
+  var touchStart = null;
+  var touchStartTime = 0;
+  var markerClicked = false;
   
-  // We'll use a different approach: listen to map click and check density
-  map.on('click', function(e) {
-    // Skip if we're already zoomed in enough
-    var zoom = map.getZoom();
-    if (zoom >= 16) return;
+  // Detect when a marker actually handled the tap
+  markers.forEach(function() {}); // markers re-created on render, so we track via flag
+  var origOpenBottomSheet = window.openBottomSheet;
+  window.openBottomSheet = function(s) {
+    markerClicked = true;
+    return origOpenBottomSheet(s);
+  };
+  
+  mapEl.addEventListener('touchstart', function(e) {
+    if (e.touches.length !== 1) return; // ignore pinch
+    touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    touchStartTime = Date.now();
+    markerClicked = false;
+  }, { passive: true });
+  
+  mapEl.addEventListener('touchend', function(e) {
+    if (!touchStart) return;
+    if (e.changedTouches.length !== 1) return;
     
-    // Skip on desktop — this is a mobile UX optimization
-    if (window.innerWidth > 640) return;
+    var dt = Date.now() - touchStartTime;
+    if (dt > 300) { touchStart = null; return; } // not a tap, was a long press or drag
     
-    // Find markers near the tap point
-    var tapPoint = map.latLngToContainerPoint(e.latlng);
-    var nearbyCount = 0;
-    var nearbyMarkers = [];
-    var tapRadius = 30; // pixels — touch target area
+    var dx = e.changedTouches[0].clientX - touchStart.x;
+    var dy = e.changedTouches[0].clientY - touchStart.y;
+    if (Math.sqrt(dx * dx + dy * dy) > 15) { touchStart = null; return; } // was a drag
     
-    for (var i = 0; i < markers.length; i++) {
-      var mPoint = map.latLngToContainerPoint(markers[i].getLatLng());
-      var dx = tapPoint.x - mPoint.x;
-      var dy = tapPoint.y - mPoint.y;
-      var dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < tapRadius) {
-        nearbyCount++;
-        nearbyMarkers.push(markers[i]);
+    var tapX = e.changedTouches[0].clientX;
+    var tapY = e.changedTouches[0].clientY;
+    touchStart = null;
+    
+    // Wait a tick to see if a marker handled this tap
+    setTimeout(function() {
+      if (markerClicked) return; // marker got it, don't zoom
+      
+      var zoom = map.getZoom();
+      if (zoom >= 16) return; // already zoomed in enough
+      
+      // Convert tap screen coords to map container coords
+      var rect = mapEl.getBoundingClientRect();
+      var containerPoint = L.point(tapX - rect.left, tapY - rect.top);
+      var latlng = map.containerPointToLatLng(containerPoint);
+      
+      // Count markers near tap point
+      var nearbyCount = 0;
+      var tapRadius = 35; // pixels
+      for (var i = 0; i < markers.length; i++) {
+        var mPoint = map.latLngToContainerPoint(markers[i].getLatLng());
+        var ddx = containerPoint.x - mPoint.x;
+        var ddy = containerPoint.y - mPoint.y;
+        if (Math.sqrt(ddx * ddx + ddy * ddy) < tapRadius) nearbyCount++;
       }
-    }
-    
-    // If 2+ markers are within tap radius, it's a dense area — zoom in
-    if (nearbyCount >= 2) {
-      var targetZoom = Math.min(zoom + 3, 17);
-      map.flyTo(e.latlng, targetZoom, {duration: 0.4});
-    }
-  });
+      
+      if (nearbyCount >= 2) {
+        map.flyTo(latlng, Math.min(zoom + 3, 17), { duration: 0.4 });
+      }
+    }, 80); // 80ms — enough for marker click to fire first
+  }, { passive: true });
 })();
 
 document.getElementById('min-rating').addEventListener('input', function() {
