@@ -294,6 +294,9 @@ searchResults.addEventListener('click', function(e) {
     const ll = m.getLatLng();
     if (Math.abs(ll.lat - s.lat) < 0.0001 && Math.abs(ll.lng - s.lng) < 0.0001) {
       m.openPopup();
+      if (s.easter_egg) {
+        setTimeout(function() { document.getElementById('easter-egg').classList.add('show'); }, 600);
+      }
     }
   });
   searchResults.style.display = 'none';
