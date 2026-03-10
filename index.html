@@ -164,6 +164,14 @@
     -webkit-overflow-scrolling: touch; scrollbar-width: none;
   }
   .quick-filters::-webkit-scrollbar { display: none; }
+  .filter-toggle {
+    display: none; /* hidden on desktop, shown on mobile */
+    align-items: center; justify-content: center;
+    width: 32px; height: 32px; flex-shrink: 0;
+    background: #FFC107; border: 2px solid #000; border-radius: 8px;
+    font-size: 14px; cursor: pointer; box-shadow: 2px 2px 0 #000;
+  }
+  .filter-toggle.active { background: #FF6B35; }
   .qf-pill {
     flex-shrink: 0; padding: 5px 12px;
     background: #FFF8EF; color: #000; border: 2px solid #000;
@@ -347,54 +355,94 @@
 
   /* ─── MOBILE ─── */
   @media (max-width: 640px) {
-    .leaflet-top.leaflet-left { top: 64px; }
+    /* Search: compact, top, full width */
     .search-bar {
-      top: env(safe-area-inset-top, 10px); width: 94%; padding: 6px 10px;
+      top: env(safe-area-inset-top, 8px); width: 94%; padding: 5px 10px;
+      border-width: 2px; box-shadow: 3px 3px 0 #000;
     }
-    .search-bar input {
-      padding: 10px 14px; font-size: 16px;
-    }
+    .search-bar input { padding: 8px 12px; font-size: 16px; }
     .search-results {
-      top: calc(env(safe-area-inset-top, 10px) + 52px);
+      top: calc(env(safe-area-inset-top, 8px) + 48px);
       width: 94%; max-height: 40vh;
       -webkit-overflow-scrolling: touch;
     }
-    .search-results .result-item { padding: 14px 16px; }
-    .quick-filters { top: 54px; width: 96%; }
-    .qf-pill { font-size: 11px; padding: 6px 10px; }
-    .info-panel { display: none; }
-    .nearme-btn { top: auto; bottom: 110px; right: 10px; font-size: 12px; padding: 8px 12px; }
-    .darkmode-btn { top: auto; bottom: 110px; right: 70px; padding: 8px 10px; }
+    .search-results .result-item { padding: 12px 14px; }
+
+    /* Quick filters: hidden by default, toggled via button */
+    .quick-filters {
+      top: calc(env(safe-area-inset-top, 8px) + 50px);
+      width: 96%; display: none;
+    }
+    .quick-filters.show { display: flex; }
+    .qf-pill { font-size: 11px; padding: 5px 10px; }
+
+    /* Filter toggle button inside search bar area */
+    .filter-toggle {
+      display: flex; /* only show on mobile */
+    }
+
+    /* Zoom controls: below search, left side */
+    .leaflet-top.leaflet-left { top: calc(env(safe-area-inset-top, 8px) + 50px); }
+    .leaflet-control-zoom a {
+      width: 34px !important; height: 34px !important;
+      line-height: 34px !important; font-size: 18px !important;
+    }
+
+    /* FAB group: bottom right, above filter bar */
+    .nearme-btn {
+      position: fixed; top: auto; bottom: 150px; right: 10px;
+      font-size: 11px; padding: 8px 12px; z-index: 1001;
+    }
+    .darkmode-btn {
+      position: fixed; top: auto; bottom: 195px; right: 10px;
+      padding: 8px 10px; z-index: 1001;
+    }
+
+    /* Count badge: small, top-left below search */
     .count-badge {
-      top: auto; bottom: 90px; left: 10px; font-size: 12px;
-      padding: 5px 12px;
+      top: calc(env(safe-area-inset-top, 8px) + 50px); left: auto; right: 10px;
+      bottom: auto; font-size: 11px; padding: 4px 10px;
+      border-width: 2px; box-shadow: 2px 2px 0 #000;
     }
+
+    /* Info panel: hidden on mobile */
+    .info-panel { display: none; }
+
+    /* Filter bar: bottom */
     .filter-bar {
-      bottom: env(safe-area-inset-bottom, 12px);
-      width: 96%; padding: 10px 12px; gap: 8px;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 28px);
+      width: 96%; padding: 8px 12px; gap: 6px;
       flex-wrap: wrap; justify-content: center;
-      border-radius: 12px;
+      border-radius: 10px; border-width: 2px;
+      box-shadow: 3px 3px 0 #000;
     }
-    .filter-bar label { font-size: 12px; }
+    .filter-bar label { font-size: 11px; }
     .filter-bar select, .filter-bar input[type="range"] { font-size: 14px; }
-    .filter-bar input[type="checkbox"] { width: 20px; height: 20px; }
-    .stall-popup { max-width: 240px; }
+    .filter-bar input[type="checkbox"] { width: 18px; height: 18px; }
+
+    /* Popups: compact */
+    .stall-popup { max-width: 250px; }
     .stall-popup h3 { font-size: 13px; }
     .stall-popup .meta { font-size: 10px; }
     .stall-popup .ratings { font-size: 11px; gap: 1px 8px; }
     .stall-popup .overall { font-size: 14px; }
-    .easter-egg-card { margin: 16px; padding: 28px 24px; max-width: 90vw; }
-    .easter-egg-card .egg-emoji { font-size: 40px; }
-    .easter-egg-card .egg-msg { font-size: 16px; }
-    .easter-egg-card .egg-close { padding: 12px 32px; font-size: 16px; }
+    .popup-actions { gap: 4px; }
+    .popup-actions .share-btn, .popup-actions .directions-btn { font-size: 11px; padding: 5px 8px; }
+
+    /* Easter egg */
+    .easter-egg-card { margin: 16px; padding: 24px 20px; max-width: 90vw; }
+    .easter-egg-card .egg-emoji { font-size: 36px; }
+    .easter-egg-card .egg-msg { font-size: 15px; }
+    .easter-egg-card .egg-close { padding: 10px 28px; font-size: 15px; }
+
+    /* Leaflet popup close */
     .leaflet-popup-close-button {
-      width: 28px !important; height: 28px !important;
-      font-size: 20px !important; padding: 4px !important;
+      width: 26px !important; height: 26px !important;
+      font-size: 18px !important; padding: 4px !important;
     }
-    .leaflet-control-zoom a {
-      width: 36px !important; height: 36px !important;
-      line-height: 36px !important; font-size: 20px !important;
-    }
+
+    /* Credit bar */
+    .credit-bar { font-size: 10px; padding: 3px 6px; }
   }
 
   /* iPhone notch / dynamic island safe areas */
@@ -410,6 +458,7 @@
 <div class="search-bar">
   <span class="search-icon">🔍</span>
   <input type="text" id="search-input" placeholder="Search by stall name or area...">
+  <div class="filter-toggle" id="filter-toggle" onclick="toggleFilterPills()">🏷️</div>
 </div>
 <div class="search-results" id="search-results"></div>
 <div class="quick-filters" id="quick-filters">
@@ -420,6 +469,7 @@
   <div class="qf-pill" data-qf="best-value" onclick="toggleQuickFilter(this)">💰 Best Value</div>
   <div class="qf-pill" data-qf="best-soup" onclick="toggleQuickFilter(this)">🍜 Best Soup</div>
   <div class="qf-pill" data-qf="ecoli-free" onclick="toggleQuickFilter(this)">✅ E.coli Free</div>
+  <div class="qf-pill" data-qf="favorites" onclick="toggleQuickFilter(this)">❤️ Favorites (0)</div>
 </div>
 
 <button class="darkmode-btn" id="darkmode-btn" onclick="toggleDark()">🌙</button>
@@ -689,6 +739,33 @@ function toggleDark() {
   localStorage.setItem('darkMode', isDark);
 }
 
+function toggleFilterPills() {
+  var qf = document.getElementById('quick-filters');
+  var btn = document.getElementById('filter-toggle');
+  qf.classList.toggle('show');
+  btn.classList.toggle('active');
+}
+
+var favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+
+function isFav(s) { return favorites.indexOf(s.sn) !== -1; }
+
+function toggleFav(sn) {
+  var idx = favorites.indexOf(sn);
+  if (idx === -1) favorites.push(sn);
+  else favorites.splice(idx, 1);
+  localStorage.setItem('favorites', JSON.stringify(favorites));
+  // Update button text in open popup
+  var btn = document.querySelector('.fav-btn[data-sn="' + sn + '"]');
+  if (btn) btn.textContent = isFav({sn:sn}) ? '❤️ Saved' : '🤍 Save';
+  updateFavCount();
+}
+
+function updateFavCount() {
+  var pill = document.querySelector('[data-qf="favorites"]');
+  if (pill) pill.textContent = '❤️ Favorites (' + favorites.length + ')';
+}
+
 var activeQuickFilter = null;
 
 function getField(s, field) {
@@ -722,6 +799,8 @@ function getQuickFilterStalls(qf) {
         .sort(function(a, b) { return getField(b, 'soup') - getField(a, 'soup'); }).slice(0, 10);
     case 'ecoli-free':
       return stalls.filter(function(s) { return s.ecoli === 'N'; });
+    case 'favorites':
+      return stalls.filter(function(s) { return isFav(s); });
     default: return [];
   }
 }
