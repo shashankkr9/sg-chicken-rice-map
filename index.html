@@ -725,9 +725,10 @@ var darkTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/
 var isDark = localStorage.getItem('darkMode') === 'true';
 if (isDark) {
   document.body.classList.add('dark');
-  map.removeLayer(lightTiles);
   darkTiles.addTo(map);
   document.getElementById('darkmode-btn').textContent = '☀️';
+} else {
+  lightTiles.addTo(map);
 }
 
 function toggleDark() {
